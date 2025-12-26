@@ -5,27 +5,6 @@ import numpy as np
 import scipy.io.wavfile as wf
 from conf import data_root
 
-MAX_INT16 = np.iinfo(np.int16).max
-
-def write_wav(fname, samps, fs=16000, normalize=True):
-    """
-    Write wav files in int16, support single/multi-channel
-    """
-    if normalize:
-        samps = samps * MAX_INT16
-    # scipy.io.wavfile.write could write single/multi-channel files
-    # for multi-channel, accept ndarray [Nsamples, Nchannels]
-    if samps.ndim != 1 and samps.shape[0] < samps.shape[1]:
-        samps = np.transpose(samps)
-        samps = np.squeeze(samps)
-    # same as MATLAB and kaldi
-    samps_int16 = samps.astype(np.int16)
-    fdir = os.path.dirname(fname)
-    if fdir and not os.path.exists(fdir):
-        os.makedirs(fdir)
-    # NOTE: librosa 0.6.0 seems could not write non-float narray
-    #       so use scipy.io.wavfile instead
-    wf.write(fname, fs, samps_int16)
 
 
 def read_wav(fname, sr=16000, return_rate=False):
@@ -34,11 +13,11 @@ def read_wav(fname, sr=16000, return_rate=False):
         return sr, wav if return_rate else wav
 
     samps, samp_rate = librosa.load(fname, sr=sr, mono=True)
-    samps_ = samps / np.max(np.abs(samps)+1e-8)
+    samps_ = librosa.util.normalize(samps)
 
     if return_rate:
-        return samp_rate, samps_
-    return samps_
+        return samp_rate, samps_.astype(np.float32)
+    return samps_.astype(np.float32)
 
 
 

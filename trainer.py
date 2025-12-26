@@ -171,7 +171,7 @@ class Trainer(object):
             all_loss = all_loss + loss
 
             i = i+1
-            # if i > 4:
+            # if i > 200:
             #     break
         avg_loss = all_loss/i
         avg_MSE = all_MSE/i
@@ -242,7 +242,7 @@ class Trainer(object):
             speech_scores,
             env_scores,
             all_scores,
-            all_labels
+            all_labels_list
         )
         self.logger.info(f"{mode} Results - original_eer: {eer_results['EER_all']:.4f}, speech_eer: {eer_results['EER_speech']:.4f}, env_eer: {eer_results['EER_env']:.4f}")
 
