@@ -61,12 +61,12 @@ class Dataset_(object):
     def __getitem__(self, index):
         key = self.mix.index_keys[index]
 
-        mix = self.mix[key][0].astype(np.float32)
+        mix = self.mix[key][0]
         label = np.array(self.labels[index], dtype=np.float32)
         path = self.mix[key][1]
         ref = []
         for reader in self.ref:
-            r = reader[key][0].astype(np.float32)
+            r = reader[key][0]
             ref.append(r)
         return {
             "mix": mix,

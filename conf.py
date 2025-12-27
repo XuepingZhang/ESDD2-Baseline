@@ -52,7 +52,7 @@ unet_conf = {
 
 adam_kwargs = {
     "lr_spr": 1e-3,
-    "lr_anti": 1e-3,
+    "lr_anti": 1e-5,
     "weight_decay": 1e-5,
 }
 trainer_conf = {
