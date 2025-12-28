@@ -23,7 +23,7 @@ def make_dataloader(train=True,
     with open(data_kwargs, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for i, row in enumerate(reader):
-            # 取你指定的字段
+
             audio[i] = os.path.join(data_root, row["audio_path"])
             labels[i] = label_map[row["label"]]
 

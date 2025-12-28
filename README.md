@@ -30,11 +30,14 @@ pip install -r requirements.txt
 
 We provide scripts for model training and evaluation:
 
-    # Training example
+    # Training
     python main.py
 
-    # Evaluation example
-    python main.py --eval /path/model.pt
+    # Evaluation on test1 set
+    python main.py --eval /path/best.pt
+
+    # Test on test2 set
+    python main.py --test /path/best.pt
 
 You can modify the configs in conf.py to conduct more experiments.
 
@@ -44,9 +47,9 @@ You can modify the configs in conf.py to conduct more experiments.
 
 | dataset   | F1-score | Precision | Recall  | Original eer | Speech eer | Env eer |
 |:----------|:---------|:----------|:--------|:-------------|:-----------|:--------|
-| val set   | -        | -         | -       | -            | -          | -       |
-| test1 set | -        | -         | -       | -            | -          | -       |
-| test2 set | -        | -         | -       | -            | -          | -       |
+| val set   | 0.9462   | 0.9415    | 0.9521  | 0.0031       | 0.0112     | 0.0448  |
+| test1 set | 0.6224   | 0.6752    | 0.6579  | 0.0174       | 0.1889     | 0.2026  |
+| test2 set | 0.6327   | 0.6851    | 0.6636  | 0.0173       | 0.1842     | 0.2006  |
 
 
 

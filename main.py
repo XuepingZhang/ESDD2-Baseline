@@ -21,6 +21,7 @@ def run(args):
                           checkpoint=checkpoint,
                           resume=args.resume,
                           eval = args.eval,
+                          test=args.test,
                           **trainer_conf,
                           start_joint=start_joint)
 
@@ -73,6 +74,10 @@ if __name__ == "__main__":
                         default="",
                         help="Exist model to resume training from")
     parser.add_argument("--eval",
+                        type=str,
+                        default=None,
+                        help="just eval best model")
+    parser.add_argument("--test",
                         type=str,
                         default=None,
                         help="just eval best model")

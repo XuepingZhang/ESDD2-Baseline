@@ -54,6 +54,7 @@ class Trainer(object):
                  factor=0.5,
                  resume=None,
                  eval=None,
+                 test=None,
                  no_impr=5,
                  start_joint=3):
         if not th.cuda.is_available():
@@ -63,6 +64,7 @@ class Trainer(object):
 
         self.device = f"cuda:{gpuid[0]}"
         self.eval = eval
+        self.test = test
         self.optimizer_kwargs = optimizer_kwargs
         self.gpuid = gpuid
         if checkpoint and not os.path.exists(checkpoint):
@@ -133,7 +135,7 @@ class Trainer(object):
         th.save(
             cpt,
             os.path.join(self.checkpoint,
-                         "{0}.pt.tar".format("best" if best else "last")))
+                         "{0}.pt.tar".format("best_epoch"+str(self.cur_epoch) if best else "last")))
 
 
     def compute_loss(self, egs, jointed=False):
@@ -273,11 +275,13 @@ class Trainer(object):
 
 
 
-
-    def run(self, train_loader, dev_loader,eval_loader,split_epoch = None, num_epochs=50):
+    def run(self, train_loader, dev_loader,eval_loader,test_loader, num_epochs=50):
         # check if save is OK
         if self.eval is not None:
             self.only_eval(self.eval, eval_loader)
+            return
+        if self.test is not None:
+            self.only_eval(self.test, test_loader)
             return
         no_impr_MSE = 0
         no_impr = 0
