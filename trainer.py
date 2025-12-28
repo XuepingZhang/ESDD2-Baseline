@@ -5,6 +5,7 @@ import torch as th
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
+from conf import work_root
 from libs.eval_metrics import compute_speech_env_all_eer
 from libs.utils import get_logger
 import torch.nn as nn
@@ -224,16 +225,19 @@ class Trainer(object):
                     label_map[(int(s), int(e), int(a))]
                     for s, e, a in zip(res_speech_, res_env_, res_all)
                 ]
-                file.append(egs["file"])
+                file.extend(egs["file"])
                 all_labels.extend(true_labels)
                 all_preds.extend(pred_labels)
 
         if all_labels[0] == -1:
             self.logger.info("==========Evaluation Test2 Set==========")
-            with open("./submission/test2_prediction.txt", "w", encoding="utf-8") as f:
+            res_path = f"{work_root}submission/"
+            os.makedirs(res_path, exist_ok=True)
+            with open(f"{res_path}test2_prediction.txt", "w", encoding="utf-8") as f:
                 for fname, pred in zip(file, all_preds):
-                    f.write(f"{fname}|{pred}\n")
-            self.logger.info('./submission/test2_prediction.txt saved!')
+                    fname_only = os.path.basename(fname)
+                    f.write(f"{fname_only}|{pred}\n")
+            self.logger.info(f"{res_path}test2_prediction.txt saved!")
             return
 
         speech_scores = np.vstack(speech_scores)
