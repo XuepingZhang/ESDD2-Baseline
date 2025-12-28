@@ -11,8 +11,8 @@ work_root = '/work/xz464/zxp/ESDD2-Baseline/'
 data_root = '/work/xz464/mix_compspoof/CompSpoof/'
 train_data = f'{data_root}development/metadata/train.csv'
 dev_data = f'{data_root}development/metadata/val.csv'
-eval_data = f'{data_root}test1/metadata/test1.csv'
-test_data = f'{data_root}test2/metadata/test2.csv'
+eval_data = f'{data_root}eval/metadata/eval.csv'
+test_data = f'{data_root}test/metadata/test.csv'
 
 
 

@@ -230,14 +230,14 @@ class Trainer(object):
                 all_preds.extend(pred_labels)
 
         if all_labels[0] == -1:
-            self.logger.info("==========Evaluation Test2 Set==========")
+            self.logger.info("==========Evaluation==========")
             res_path = f"{work_root}submission/"
             os.makedirs(res_path, exist_ok=True)
-            with open(f"{res_path}test2_prediction.txt", "w", encoding="utf-8") as f:
+            with open(f"{res_path}prediction.txt", "w", encoding="utf-8") as f:
                 for fname, pred in zip(file, all_preds):
                     fname_only = os.path.basename(fname)
                     f.write(f"{fname_only}|{pred}\n")
-            self.logger.info(f"{res_path}test2_prediction.txt saved!")
+            self.logger.info(f"{res_path}prediction.txt saved!")
             return
 
         speech_scores = np.vstack(speech_scores)
