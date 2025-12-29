@@ -33,10 +33,10 @@ We provide scripts for model training and evaluation:
     # Training
     python main.py
 
-    # Evaluation on test1 set
+    # Evaluation on eval set
     python main.py --eval /path/best.pt
 
-    # Test on test2 set
+    # Test on test set
     python main.py --test /path/best.pt
 
 You can modify the configs in conf.py to conduct more experiments.
