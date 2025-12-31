@@ -11,9 +11,7 @@ def compute_speech_env_all_eer(
     labels:        list of [speech, env, all]
     """
 
-    speech_scores = speech_scores[:, 1]
-    env_scores = env_scores[:, 1]
-    all_scores = all_scores[:, 1]
+
 
     labels = np.asarray(labels)
     speech_labels = labels[:, 0]
@@ -22,17 +20,11 @@ def compute_speech_env_all_eer(
 
     # ---------- all EER ----------
     eer_all = compute_eer(all_scores, all_labels)
+    speech_scores_f = speech_scores
+    speech_labels_f = speech_labels
 
-
-    # all label == 0 and all pred == 0
-    all_pred = (all_scores >= 0.5).astype(int)
-    valid_mask = (all_labels == 0) & (all_pred == 0)
-
-    speech_scores_f = speech_scores[valid_mask]
-    speech_labels_f = speech_labels[valid_mask]
-
-    env_scores_f = env_scores[valid_mask]
-    env_labels_f = env_labels[valid_mask]
+    env_scores_f = env_scores
+    env_labels_f = env_labels
 
     eer_speech = compute_eer(speech_scores_f, speech_labels_f)
     eer_env = compute_eer(env_scores_f, env_labels_f)

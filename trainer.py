@@ -229,20 +229,26 @@ class Trainer(object):
                 all_labels.extend(true_labels)
                 all_preds.extend(pred_labels)
 
+
+        speech_scores = np.vstack(speech_scores)
+        env_scores = np.vstack(env_scores)
+        all_scores = np.vstack(all_scores)
+        speech_scores = speech_scores[:, 1]
+        env_scores = env_scores[:, 1]
+        all_scores = all_scores[:, 1]
+
         if all_labels[0] == -1:
             self.logger.info("==========Evaluation==========")
             res_path = f"{work_root}submission/"
             os.makedirs(res_path, exist_ok=True)
             with open(f"{res_path}prediction.txt", "w", encoding="utf-8") as f:
-                for fname, pred in zip(file, all_preds):
+                for fname,speech_score, env_score, all_score, pred in zip(file,speech_scores, env_scores, all_scores,all_preds):
                     fname_only = os.path.basename(fname)
-                    f.write(f"{fname_only}|{pred}\n")
+                    f.write(f"{fname_only}|{speech_score}|{env_score}|{all_score}|{pred}\n")
             self.logger.info(f"{res_path}prediction.txt saved!")
             return
 
-        speech_scores = np.vstack(speech_scores)
-        env_scores = np.vstack(env_scores)
-        all_scores = np.vstack(all_scores)
+
 
         eer_results = compute_speech_env_all_eer(
             speech_scores,
