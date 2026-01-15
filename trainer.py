@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from conf import work_root
-from libs.eval_metrics import compute_speech_env_all_eer
+from libs.eval_metrics import compute_eers
 from libs.utils import get_logger
 import torch.nn as nn
 import os
@@ -122,7 +122,7 @@ class Trainer(object):
     def make_optimizer(self, model):
         optimizer = optim.Adam([
             {"params": model.spar.parameters(), "lr": self.optimizer_kwargs['lr_spr']},
-            {"params": model.aasist_all.parameters(), "lr": self.optimizer_kwargs['lr_anti']},
+            {"params": model.aasist_original.parameters(), "lr": self.optimizer_kwargs['lr_anti']},
             {"params": model.aasist_speech.parameters(), "lr": self.optimizer_kwargs['lr_anti']},
             {"params": model.aasist_env.parameters(), "lr": self.optimizer_kwargs['lr_anti']},
         ])
@@ -187,6 +187,7 @@ class Trainer(object):
         self.nnet.eval()
 
         label_map = {
+          # (epeech score, env score, original score)
             (-1,-1,-1):-1,
             (0, 0, 1): 0,
             (0, 1, 1): 0,
@@ -199,7 +200,7 @@ class Trainer(object):
         }
 
         all_labels, all_preds, file = [], [], []
-        speech_scores, env_scores, all_scores, all_labels_list = [], [], [],[]
+        original_scores, speech_scores, env_scores, all_labels_list = [], [], [],[]
 
 
         with th.no_grad():
@@ -210,20 +211,21 @@ class Trainer(object):
                 true_labels = [label_map[tuple(lbl)] for lbl in labels]
 
                 res = th.nn.parallel.data_parallel(self.nnet, egs, device_ids=self.gpuid)
-                speech_, env_, res_speech_score, res_env_score, res_speech, res_env, res_all_score, h_all, h_speech_, h_env_, h_speech, h_env = res
+                speech_, env_, res_speech_score, res_env_score, res_speech, res_env, res_original_score, h_original, h_speech_, h_env_, h_speech, h_env = res
 
                 speech_scores.append(res_speech_score.detach().cpu().numpy())
                 env_scores.append(res_env_score.detach().cpu().numpy())
-                all_scores.append(res_all_score.detach().cpu().numpy())
+                original_scores.append(res_original_score.detach().cpu().numpy())
                 all_labels_list.extend(labels)
 
+                res_original = res_original_score.argmax(dim=1).cpu().numpy()
                 res_speech_ = res_speech_score.argmax(dim=1).cpu().numpy()
                 res_env_ = res_env_score.argmax(dim=1).cpu().numpy()
-                res_all = res_all_score.argmax(dim=1).cpu().numpy()
+
 
                 pred_labels = [
-                    label_map[(int(s), int(e), int(a))]
-                    for s, e, a in zip(res_speech_, res_env_, res_all)
+                    label_map[( int(s), int(e), int(o))]
+                    for s, e, o in zip( res_speech_, res_env_, res_original)
                 ]
                 file.extend(egs["file"])
                 all_labels.extend(true_labels)
@@ -232,31 +234,31 @@ class Trainer(object):
 
         speech_scores = np.vstack(speech_scores)
         env_scores = np.vstack(env_scores)
-        all_scores = np.vstack(all_scores)
+        original_scores = np.vstack(original_scores)
         speech_scores = speech_scores[:, 1]
         env_scores = env_scores[:, 1]
-        all_scores = all_scores[:, 1]
+        original_scores = original_scores[:, 1]
 
         if all_labels[0] == -1:
             self.logger.info("==========Evaluation==========")
             res_path = f"{work_root}submission/"
             os.makedirs(res_path, exist_ok=True)
             with open(f"{res_path}prediction.txt", "w", encoding="utf-8") as f:
-                for fname,speech_score, env_score, all_score, pred in zip(file,speech_scores, env_scores, all_scores,all_preds):
+                for fname,speech_score, env_score, original_score, pred in zip(file,speech_scores, env_scores, original_scores,all_preds):
                     fname_only = os.path.basename(fname)
-                    f.write(f"{fname_only}|{speech_score}|{env_score}|{all_score}|{pred}\n")
+                    f.write(f"{fname_only}|{pred}|{original_score}|{speech_score}|{env_score}\n")
             self.logger.info(f"{res_path}prediction.txt saved!")
             return
 
 
 
-        eer_results = compute_speech_env_all_eer(
+        eer_results = compute_eers(
             speech_scores,
             env_scores,
-            all_scores,
+            original_scores,
             all_labels_list
         )
-        self.logger.info(f"{mode} Results - original_eer: {eer_results['EER_all']:.4f}, speech_eer: {eer_results['EER_speech']:.4f}, env_eer: {eer_results['EER_env']:.4f}")
+        self.logger.info(f"{mode} Results - original_eer: {eer_results['EER_original,']:.4f}, speech_eer: {eer_results['EER_speech']:.4f}, env_eer: {eer_results['EER_env']:.4f}")
 
         precision = precision_score(all_labels, all_preds, average='macro')
         recall = recall_score(all_labels, all_preds, average="macro")
@@ -342,16 +344,16 @@ class Trainer_All(Trainer):
         # spks x n x S
         res = th.nn.parallel.data_parallel(self.nnet, egs, device_ids=self.gpuid)
 
-        speech_, env_, res_speech_, res_env_, res_speech, res_env, res_all , h_all, h_speech_, h_env_, h_speech, h_env = res
+        speech_, env_, res_speech_, res_env_, res_speech, res_env, res_original , h_original, h_speech_, h_env_, h_speech, h_env = res
         label_speech = egs['label'].T[0]
         label_env = egs['label'].T[1]
-        label_all = egs['label'].T[2]
+        label_original = egs['label'].T[2]
 
 
-        weights = th.tensor([0.2, 0.8], device=res_all.device, dtype=th.float32)
-        L_cls_all = F.cross_entropy(res_all, label_all.long(), weight=weights)
+        weights = th.tensor([0.2, 0.8], device=res_original.device, dtype=th.float32)
+        L_cls_original = F.cross_entropy(res_original, label_original.long(), weight=weights)
 
-        mask = (label_all == 0)
+        mask = (label_original == 0)
         mask_count = mask.sum().item()
 
         # ===== (MSE) =====
@@ -378,7 +380,7 @@ class Trainer_All(Trainer):
 
                 L_cons = L_cons_speech + L_cons_env
 
-            return L_cls_all + 10*MSE + L_cls_speech_ + L_cls_env_ + L_cons, 10*MSE
+            return L_cls_original + 10*MSE + L_cls_speech_ + L_cls_env_ + L_cons, 10*MSE
 
         else:
             L_cls_speech, L_cls_env = 0.0, 0.0
@@ -386,4 +388,4 @@ class Trainer_All(Trainer):
                 L_cls_speech = F.cross_entropy(res_speech[mask], label_speech[mask].long())
                 L_cls_env = F.cross_entropy(res_env[mask], label_env[mask].long())
 
-            return L_cls_all + 10*MSE + L_cls_speech + L_cls_env, 10*MSE
+            return L_cls_original + 10*MSE + L_cls_speech + L_cls_env, 10*MSE

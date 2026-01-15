@@ -11,13 +11,13 @@ class Model(nn.Module):
         self.spar = UNetSTFTComplexRefine(unet_base_ch=unet_conf['unet_base_ch'], unet_layers=unet_conf['unet_layers'])
 
 
-        self.aasist_all = XLSR2_AASIST(aasist_conf)
+        self.aasist_original = XLSR2_AASIST(aasist_conf)
         self.aasist_speech = XLSR2_AASIST(aasist_conf)
         self.aasist_env = XLSR2_AASIST(aasist_conf)
 
 
     def forward(self, egs):
-        h_all, res_all = self.aasist_all(egs['mix'])
+        h_original, res_original = self.aasist_original(egs['mix'])
         speech_, env_ = self.spar(egs['mix'])
 
         h_speech_, res_speech_ = self.aasist_speech(speech_)
@@ -26,7 +26,7 @@ class Model(nn.Module):
         h_env, res_env = self.aasist_env(egs["ref"][1])
 
         return speech_, env_\
-            , res_speech_, res_env_, res_speech, res_env, res_all\
-            , h_all, h_speech_, h_env_, h_speech, h_env
+            , res_speech_, res_env_, res_speech, res_env, res_original\
+            , h_original, h_speech_, h_env_, h_speech, h_env
 
 

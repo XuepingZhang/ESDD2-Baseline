@@ -1,7 +1,7 @@
-def compute_speech_env_all_eer(
+def compute_eers(
     speech_scores,
     env_scores,
-    all_scores,
+    original_scores,
     labels
 ):
     """
@@ -16,10 +16,10 @@ def compute_speech_env_all_eer(
     labels = np.asarray(labels)
     speech_labels = labels[:, 0]
     env_labels = labels[:, 1]
-    all_labels = labels[:, 2]
+    original_labels = labels[:, 2]
 
     # ---------- all EER ----------
-    eer_all = compute_eer(all_scores, all_labels)
+    eer_original = compute_eer(original_scores, original_labels)
     speech_scores_f = speech_scores
     speech_labels_f = speech_labels
 
@@ -32,7 +32,7 @@ def compute_speech_env_all_eer(
     return {
         "EER_speech": eer_speech,
         "EER_env": eer_env,
-        "EER_all": eer_all,
+        "EER_original": eer_original,
     }
 
 import numpy as np
