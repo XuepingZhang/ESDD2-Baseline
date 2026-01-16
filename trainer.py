@@ -258,7 +258,7 @@ class Trainer(object):
             original_scores,
             all_labels_list
         )
-        self.logger.info(f"{mode} Results - original_eer: {eer_results['EER_original,']:.4f}, speech_eer: {eer_results['EER_speech']:.4f}, env_eer: {eer_results['EER_env']:.4f}")
+        self.logger.info(f"{mode} Results - original_eer: {eer_results['EER_original']:.4f}, speech_eer: {eer_results['EER_speech']:.4f}, env_eer: {eer_results['EER_env']:.4f}")
 
         precision = precision_score(all_labels, all_preds, average='macro')
         recall = recall_score(all_labels, all_preds, average="macro")
