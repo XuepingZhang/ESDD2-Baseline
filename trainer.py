@@ -187,7 +187,7 @@ class Trainer(object):
         self.nnet.eval()
 
         label_map = {
-          # (epeech score, env score, original score)
+          # (speech score, env score, original score)
             (-1,-1,-1):-1,
             (0, 0, 1): 0,
             (0, 1, 1): 0,
@@ -247,7 +247,12 @@ class Trainer(object):
                 for fname,speech_score, env_score, original_score, pred in zip(file,speech_scores, env_scores, original_scores,all_preds):
                     fname_only = os.path.basename(fname)
                     f.write(f"{fname_only}|{pred}|{original_score}|{speech_score}|{env_score}\n")
-            self.logger.info(f"{res_path}prediction.txt saved!")
+            import zipfile
+
+            with zipfile.ZipFile(f"{res_path}prediction.txt.zip", "w", zipfile.ZIP_DEFLATED) as zf:
+                zf.write(f"{res_path}prediction.txt", arcname="prediction.txt")
+
+            self.logger.info(f"{res_path}prediction.txt and prediction.txt.zip saved, please upload prediction.txt.zip to codabench for scoring!")
             return
 
 
