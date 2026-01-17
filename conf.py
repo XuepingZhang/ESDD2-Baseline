@@ -7,8 +7,8 @@ num_workers=8
 
 joint=True # joint learning setting
 
-work_root = '/work/xz464/zxp/ESDD2-Baseline/'
-data_root = '/work/xz464/mix_compspoof/CompSpoof/'
+work_root = '/home/you/ESDD2-Baseline/'
+data_root = '/home/you/CompSpoofV2/'
 train_data = f'{data_root}development/metadata/train.csv'
 dev_data = f'{data_root}development/metadata/val.csv'
 eval_data = f'{data_root}eval/metadata/eval.csv'
@@ -16,7 +16,7 @@ test_data = f'{data_root}test/metadata/test.csv'
 
 
 
-checkpoint_root=f'/work/xz464/zxp/ESDD2-Baseline/weight'
+checkpoint_root=f'/home/you/ESDD2-Baseline/weight'
 os.makedirs(checkpoint_root, exist_ok=True)
 
 xlsr2_300m_path = f'{checkpoint_root}/xlsr2_300m.pt'
