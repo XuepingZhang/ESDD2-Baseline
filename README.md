@@ -2,6 +2,7 @@
 
 This repository contains the official implementation of ESDD2 challenge baseline system.
 
+ESDD2 Challenge Website: https://sites.google.com/view/esdd-challenge/esdd-challenges/esdd-2/description
 ***
 
 ## ⚙️ Setup
